@@ -65,3 +65,32 @@ def test_benchmark_measures_the_real_session(model):
     assert report["latency_ms"]["mean"] > 0
     assert report["providers"] == ["CPUExecutionProvider"]
     assert report["model_sha256"] == detector.model_sha256
+
+
+def test_cli_prelabels_with_an_onnx_model(tmp_path, model):
+    from tests.fixtures import write_image
+    from visionops.cli import main
+    from visionops.jsonl import read_jsonl
+    from visionops.schemas import PredictionRecord
+
+    write_image(tmp_path / "frames" / "a.png", 90)
+    manifest = tmp_path / "ds" / "manifest.jsonl"
+    assert main(["ingest", "--input", str(tmp_path / "frames"), "--out", str(tmp_path / "ds")]) == 0
+    out = tmp_path / "ds" / "predictions.jsonl"
+    assert (
+        main(
+            [
+                "prelabel",
+                "--manifest",
+                str(manifest),
+                "--model",
+                str(model),
+                "--out",
+                str(out),
+            ]
+        )
+        == 0
+    )
+    (record,) = read_jsonl(out, PredictionRecord)
+    assert record.person_count == 1
+    assert record.model_id == "fixture.onnx"

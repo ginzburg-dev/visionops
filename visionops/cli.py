@@ -108,7 +108,12 @@ def _run_ingest(args: argparse.Namespace) -> int:
 def _run_prelabel(args: argparse.Namespace) -> int:
     from visionops.prelabel import UltralyticsPersonDetector, prelabel_manifest
 
-    detector = UltralyticsPersonDetector(args.model, args.confidence, args.iou, args.device)
+    if args.model.suffix.lower() == ".onnx":
+        from visionops.inference import OnnxPersonDetector
+
+        detector = OnnxPersonDetector(args.model, args.confidence, args.iou)
+    else:
+        detector = UltralyticsPersonDetector(args.model, args.confidence, args.iou, args.device)
     out = prelabel_manifest(
         args.manifest, detector, args.out, detector.model_id, detector.model_sha256
     )

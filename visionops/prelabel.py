@@ -107,7 +107,13 @@ class UltralyticsPersonDetector:
         if self._predictor is not None:
             return self._predictor(image_bgr)
         if self._model is None:
-            from ultralytics import YOLO  # lazy: local training dependency only
+            try:
+                from ultralytics import YOLO  # lazy: local training dependency only
+            except ImportError as error:  # pragma: no cover - depends on the installed extras
+                raise ImportError(
+                    "prelabelling a .pt weight needs the optional train extra: "
+                    "uv sync --extra train"
+                ) from error
 
             self._model = YOLO(str(self.model_path))
         return self._model.predict(
