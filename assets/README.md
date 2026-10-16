@@ -1,13 +1,18 @@
 # Showcase assets
 
-This directory holds the annotated derivative of a crowd clip and its provenance file. Raw
-footage is never committed: `assets/raw/` is ignored, and the pipeline never downloads media.
+This directory holds a still from the annotated derivative of a crowd clip and its
+provenance file. Neither raw footage nor rendered video is committed: `assets/raw/` and every
+`*.mp4` are ignored, and the pipeline never downloads media.
 
 ## Status
 
-The showcase has been rendered: `crowd-showcase.mp4`, `crowd-showcase.png`, and
-`crowd-showcase.json` are the real output of `make-showcase` over the source described below,
-using `models/person.onnx`. The numbers quoted in the root README come from that JSON file.
+The showcase has been rendered over the source described below, using
+`models/person.onnx`. `crowd-showcase.png` (the busiest frame) and `crowd-showcase.json` are
+committed; the numbers quoted in the root README come from that JSON file.
+
+`crowd-showcase.mp4` is **not** committed. At 43 MB it would sit in the history of every
+clone forever, so it is ignored like any other video here. Re-create it with the command
+below: the same source, model, and window produce the same clip.
 
 ## Source gates
 

@@ -10,9 +10,10 @@ people, recognise faces, track identities between frames, or estimate crowd dens
 
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
-The frame above is the busiest frame of [`assets/crowd-showcase.mp4`](assets/crowd-showcase.mp4),
-produced by `make-showcase`; its provenance is in
-[`assets/crowd-showcase.json`](assets/crowd-showcase.json).
+The frame above is the busiest frame of the annotated clip produced by `make-showcase`, and
+its provenance is in [`assets/crowd-showcase.json`](assets/crowd-showcase.json). The clip
+itself is not committed, to keep it out of the repository's history;
+[assets/README.md](assets/README.md) has the one command that regenerates it.
 
 ## Architecture
 
