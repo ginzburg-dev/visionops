@@ -1,3 +1,4 @@
+import hashlib
 from pathlib import Path
 
 import cv2
@@ -19,3 +20,44 @@ def write_image(path: Path, value: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     image = np.full((24, 32, 3), value, dtype=np.uint8)
     assert cv2.imwrite(str(path), image)
+
+
+def make_frame(image_id: str, *, group: str = "group-a", path: str | None = None):
+    from visionops.schemas import FrameRecord
+
+    index = int(image_id.rsplit("-", 1)[-1])
+    return FrameRecord(
+        image_id=image_id,
+        image_path=path or f"images/{image_id}.jpg",
+        source_path=f"/data/{group}.mp4",
+        source_id=group,
+        frame_index=index,
+        timestamp_s=0.0,
+        width=32,
+        height=24,
+        split_group=group,
+        content_sha256=hashlib.sha256(image_id.encode("utf-8")).hexdigest(),
+    )
+
+
+def make_prediction(image_id: str, confidences=(0.9,), **kwargs):
+    from visionops.schemas import Detection, PredictionRecord
+
+    detections = tuple(
+        Detection(
+            class_id=0,
+            class_name="person",
+            confidence=value,
+            bbox_xyxy_px=(1.0 + index, 2.0, 11.0 + index, 20.0),
+        )
+        for index, value in enumerate(confidences)
+    )
+    return PredictionRecord(
+        image=make_frame(image_id, **kwargs),
+        model_id="fake-model",
+        model_sha256="b" * 64,
+        confidence_threshold=0.25,
+        iou_threshold=0.7,
+        detections=detections,
+        person_count=len(detections),
+    )

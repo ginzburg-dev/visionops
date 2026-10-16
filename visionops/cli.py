@@ -119,7 +119,9 @@ def _run_select(args: argparse.Namespace) -> int:
     from visionops.selection import select_records
 
     predictions = read_jsonl(args.predictions, PredictionRecord)
-    records = select_records(predictions, args.budget, args.strategy, args.seed)
+    records = select_records(
+        predictions, args.budget, args.strategy, args.seed, root=args.predictions.parent
+    )
     print(f"selection={write_jsonl(args.out, records)}")
     return 0
 
