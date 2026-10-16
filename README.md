@@ -41,10 +41,13 @@ downloaded at runtime: media, weights, and datasets are passed in as local paths
 ## Quickstart
 
 ```bash
-uv sync --extra dev
-uv run pytest -q
+make sync      # uv sync --extra dev
+make quality   # ruff check, formatter check, pytest
 uv run python -m visionops --help
 ```
+
+`make help` lists every target. Each one is a thin wrapper over the `uv` command shown
+beside it, so the Makefile is a convenience, never a hidden build step.
 
 Ingest frames, pre-annotate them with a local detector, and build a review batch:
 
@@ -190,9 +193,10 @@ download date.
 
 ## Verified on this checkout
 
-- `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -q` pass, and
-  GitHub Actions re-runs all three on every push and pull request, alongside a job that
-  builds the Docker image and checks the container starts.
+- `make quality` passes: `ruff check`, the formatter check, and 80 tests. GitHub Actions
+  re-runs it on every push and pull request, alongside a job that builds the Docker image
+  and checks the container starts. Tagged `v*` pushes build and publish distributions after
+  the same gate, with the tag checked against the version in `pyproject.toml`.
 - The fixture smoke path runs end to end: `ingest` → fixture predictions → `select` →
   `export-labelstudio`, with the emitted JSON parsed back.
 - `make-showcase` was run against the real clip and the exported model; output frames were

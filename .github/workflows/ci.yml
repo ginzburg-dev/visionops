@@ -16,9 +16,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: uv sync --extra dev
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run pytest -q
+      - run: make quality
 
   image:
     runs-on: ubuntu-latest
