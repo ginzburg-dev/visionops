@@ -3,20 +3,21 @@
 [![quality](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml/badge.svg)](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml)
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 
-A command-line pipeline for person detection in crowded scenes: it turns local video and
-image files into a reviewable dataset, wraps detector training and held-out evaluation,
-exports the detector to ONNX with a parity check, and serves CPU inference over HTTP.
+VisionOps finds people in crowded footage and counts them. Every detection is a box, a
+confidence, and a running `person_count`.
 
-A prediction contains one bounding box and confidence per detected person plus
-`person_count`, computed from the final filtered detections. VisionOps does not identify
-people, recognise faces, track identities between frames, or estimate crowd density.
+It boxes people. It does not recognise faces, match identities, follow anyone between
+frames, or estimate density.
 
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
-The frame above is the busiest frame of the annotated clip produced by `make-showcase`, and
-its provenance is in [`assets/crowd-showcase.json`](assets/crowd-showcase.json). The clip
-itself is not committed, to keep it out of the repository's history;
-[assets/README.md](assets/README.md) has the one command that regenerates it.
+Behind that frame is a pipeline of commands: local video and images in, a reviewable dataset
+out, then training, held-out evaluation, an ONNX export checked against the source model,
+and CPU inference over HTTP.
+
+The frame is the busiest one in a clip rendered by `make-showcase`; its provenance is in
+[`assets/crowd-showcase.json`](assets/crowd-showcase.json). The clip itself stays out of the
+repository, and [assets/README.md](assets/README.md) has the command that rebuilds it.
 
 ## Architecture
 
@@ -46,8 +47,7 @@ make quality   # ruff check, formatter check, pytest
 uv run python -m visionops --help
 ```
 
-`make help` lists every target. Each one is a thin wrapper over the `uv` command shown
-beside it, so the Makefile is a convenience, never a hidden build step.
+`make help` lists the rest. Every target is a one-line wrapper over `uv`.
 
 Ingest frames, pre-annotate them with a local detector, and build a review batch:
 
@@ -137,20 +137,16 @@ docker build -t visionops:local .
 docker run --rm -p 8000:8000 -v "$PWD/models:/models:ro" visionops:local
 ```
 
-The image is a slim CPU image, runs as a non-root user, and declares a healthcheck against
-`/health`. Mount the ONNX model at `/models/person.onnx` or override `VISIONOPS_MODEL`. The
-built image is 645 MB and reports `healthy` within seconds of starting; the read-only mount
-is enforced, so the container cannot write back to `models/`.
+645 MB, runs as a non-root user, healthchecks `/health`, and reports healthy within
+seconds. Mount the model at `/models/person.onnx` or override `VISIONOPS_MODEL`.
 
 ## Measured results
 
-Every number below was produced by a command in this repository and is backed by the named
-artifact. Do not publish an accuracy or speed claim that is not.
+Each number comes from the artifact named beside it. Nothing else is claimed.
 
-The exported detector is the stock `yolo11n.pt` COCO weight passed in as a local file, not a
-detector trained here. It is used to exercise and measure the export, serving, and showcase
-paths; no detector has been trained on this checkout, so there are still no precision,
-recall, or mAP figures.
+The model here is the stock `yolo11n.pt` COCO weight, passed in as a local file. It exercises
+the export, serving, and showcase paths. No detector has been trained in this repository, so
+there are no precision, recall, or mAP figures.
 
 **Export parity** — `models/model-manifest.json`
 
@@ -186,10 +182,8 @@ through the same ONNX model at confidence 0.25 and IoU 0.7:
 | --- | --- | --- | --- |
 | 240 | 5 to 20 | 13.2 | 20 |
 
-These are counts this detector produced on that footage, not ground truth: nothing in this
-clip has been human-reviewed, so the counts carry no measured precision or recall.
-[assets/README.md](assets/README.md) records the source, the licence decision, and the
-download date.
+These are counts this detector produced, not ground truth: nobody has reviewed this clip.
+[assets/README.md](assets/README.md) records the source, the licence, and the download date.
 
 ## Verified on this checkout
 
