@@ -4,8 +4,11 @@
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 
 Person detection and counting in video, from raw footage to a served model.
-VisionOps turns local video into a reviewable dataset, trains and evaluates a detector,
-exports it to ONNX, and serves it over HTTP on CPU.
+
+VisionOps is a Python package with a command-line interface. Ten commands turn local video
+into a reviewable dataset, train and evaluate a detector, export it to ONNX, and serve it
+over HTTP on CPU. The same steps are importable, so you can call them from Python instead
+of a shell.
 
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
@@ -61,6 +64,23 @@ uv run python -m visionops prelabel --manifest data/pool/manifest.jsonl --model 
 uv run python -m visionops select --predictions data/pool/predictions.jsonl --out data/pool/selection.jsonl --budget 200 --strategy uncertainty --seed 0
 uv run python -m visionops export-labelstudio --selection data/pool/selection.jsonl --out data/pool/tasks.json
 ```
+
+## From Python
+
+```python
+from visionops.ingest import ingest
+from visionops.inference import OnnxPersonDetector
+import cv2
+
+ingest(["data/raw/clip.mp4"], "data/pool", stride=5, max_frames=None, seed=0)
+
+detector = OnnxPersonDetector("models/person.onnx", confidence=0.25, iou=0.7)
+detections = detector.detect(cv2.imread("frame.jpg"))
+print(len(detections), "people")
+```
+
+`visionops.api.create_app(model_path)` returns the FastAPI app if you want to mount it in a
+service of your own.
 
 ## Commands
 
