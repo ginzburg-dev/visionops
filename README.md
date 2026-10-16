@@ -138,7 +138,7 @@ seconds. Mount the model at `/models/person.onnx` or override `VISIONOPS_MODEL`.
 
 ## Measured results
 
-Each number comes from the artifact named beside it. Nothing else is claimed.
+Each number comes from the artifact named beside it.
 
 The model here is the stock `yolo11n.pt` COCO weight, passed in as a local file. It exercises
 the export, serving, and showcase paths. No detector has been trained in this repository, so
@@ -154,9 +154,6 @@ frames carrying 24 person detections in total:
 | --- | --- | --- |
 | Largest box corner difference | 0.00018 px | 2.0 px |
 | Largest confidence difference | 0.0000013 | 0.02 |
-
-Parity holds only because both paths letterbox identically; see the note under
-[Limitations](#limitations).
 
 **CPU latency** — `experiments/runs/benchmark-yolo11n.json`
 
@@ -181,46 +178,18 @@ through the same ONNX model at confidence 0.25 and IoU 0.7:
 These are counts this detector produced, not ground truth: nobody has reviewed this clip.
 [assets/README.md](assets/README.md) records the source, the licence, and the download date.
 
-## Verified on this checkout
-
-- `make quality` passes: `ruff check`, the formatter check, and 80 tests. GitHub Actions
-  re-runs it on every push and pull request, alongside a job that builds the Docker image
-  and checks the container starts. Tagged `v*` pushes build and publish distributions after
-  the same gate, with the tag checked against the version in `pyproject.toml`.
-- The fixture smoke path runs end to end: `ingest` → fixture predictions → `select` →
-  `export-labelstudio`, with the emitted JSON parsed back.
-- `make-showcase` was run against the real clip and the exported model; output frames were
-  inspected for readable boxes and the provenance JSON checked field by field.
-- ONNX Runtime is exercised for real against a tiny constant-output fixture model: the
-  session loads, preprocessing and decoding run, and the full command chain
-  `ingest` -> `prelabel` -> `select` -> `export-labelstudio` -> `benchmark` completes.
-- A live `serve` process answered `200` on `/health`, `200` on `/predict` with the expected
-  `person_count`, and `415` on an unsupported content type. The benchmark timings from that
-  fixture model measure the harness, not a detector, and are not reported as model
-  performance.
-- The Docker image was built and exercised here: `docker build -t visionops:local .`
-  succeeded, and the container answered `200` on `/health` and `200` on `/predict` with
-  `person_count: 12` for a real 1920x1080 crowd frame, with `models/` mounted read-only and
-  the server running as the non-root `visionops` user (uid 10001).
-- The Ultralytics-backed paths run for real with `uv sync --extra train`: `prelabel` was run
-  against a local `yolo11n.pt` weight, and `export-onnx` exported and parity-checked that
-  weight against the Ultralytics detector. Training and evaluation remain covered only
-  through injected trainers and evaluators, because no dataset has been reviewed here.
-
-## Limitations
+## Scope and limitations
 
 - Person class only. No faces, identities, tracking, re-identification, or density maps.
 - Uncertainty selection scores confidence ambiguity around 0.5 and image diversity by
-  difference hash; it is a heuristic, not a calibrated acquisition function.
-- Export parity is checked on the sample images you pass in, at the tolerances recorded in
-  `model-manifest.json`. It is evidence about those samples, not a general guarantee.
-- Parity depends on both paths letterboxing identically: bilinear resampling to a square
-  canvas. A source detector configured with different preprocessing will diverge even though
-  the weights are the same, which is exactly what the check is there to catch.
-- The benchmark measures single-image CPU latency on the machine that runs it. Numbers do not
-  transfer between machines.
+  difference hash. It is a heuristic, not a calibrated acquisition function.
+- Export parity is evidence about the sample images you pass in, at the tolerances recorded
+  in `model-manifest.json`, not a general guarantee. It holds only while both paths
+  letterbox the same way: bilinear, to a square canvas.
+- `train` and `evaluate` are covered by tests with injected trainers, not by a real
+  training run, because no dataset has been reviewed here.
 - The ONNX decoder expects a YOLO-style output of 4 box values followed by class scores, in
-  either `[1, attributes, anchors]` or `[1, anchors, attributes]` layout; anything else fails
+  either `[1, attributes, anchors]` or `[1, anchors, attributes]` layout. Anything else fails
   with the observed shape rather than guessing.
 
 ## Third-party components and responsibilities
