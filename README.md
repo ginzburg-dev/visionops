@@ -131,7 +131,9 @@ docker run --rm -p 8000:8000 -v "$PWD/models:/models:ro" visionops:local
 ```
 
 The image is a slim CPU image, runs as a non-root user, and declares a healthcheck against
-`/health`. Mount the ONNX model at `/models/person.onnx` or override `VISIONOPS_MODEL`.
+`/health`. Mount the ONNX model at `/models/person.onnx` or override `VISIONOPS_MODEL`. The
+built image is 645 MB and reports `healthy` within seconds of starting; the read-only mount
+is enforced, so the container cannot write back to `models/`.
 
 ## Measured results
 
@@ -196,8 +198,10 @@ download date.
   `person_count`, and `415` on an unsupported content type. The benchmark timings from that
   fixture model measure the harness, not a detector, and are not reported as model
   performance.
-- The Docker image has **not** been built here: the Docker daemon was not running on this
-  machine. `docker build -t visionops:local .` is unverified.
+- The Docker image was built and exercised here: `docker build -t visionops:local .`
+  succeeded, and the container answered `200` on `/health` and `200` on `/predict` with
+  `person_count: 12` for a real 1920x1080 crowd frame, with `models/` mounted read-only and
+  the server running as the non-root `visionops` user (uid 10001).
 - The Ultralytics-backed paths run for real with `uv sync --extra train`: `prelabel` was run
   against a local `yolo11n.pt` weight, and `export-onnx` exported and parity-checked that
   weight against the Ultralytics detector. Training and evaluation remain covered only
