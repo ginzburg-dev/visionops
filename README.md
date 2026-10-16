@@ -3,11 +3,10 @@
 [![quality](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml/badge.svg)](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml)
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 
-VisionOps finds people in crowded footage and counts them. Every detection is a box, a
-confidence, and a running `person_count`.
+VisionOps is a person detection system for crowded scenes. It draws a bounding box around
+every person in a frame, with a confidence, and reports how many there are.
 
-It boxes people. It does not recognise faces, match identities, follow anyone between
-frames, or estimate density.
+No faces, no identities, no tracking between frames, no density maps.
 
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
