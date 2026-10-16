@@ -1,5 +1,8 @@
 # VisionOps
 
+[![quality](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml/badge.svg)](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml)
+[![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+
 A command-line pipeline for person detection in crowded scenes: it turns local video and
 image files into a reviewable dataset, wraps detector training and held-out evaluation,
 exports the detector to ONNX with a parity check, and serves CPU inference over HTTP.
@@ -187,7 +190,9 @@ download date.
 
 ## Verified on this checkout
 
-- `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -q` pass.
+- `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -q` pass, and
+  GitHub Actions re-runs all three on every push and pull request, alongside a job that
+  builds the Docker image and checks the container starts.
 - The fixture smoke path runs end to end: `ingest` → fixture predictions → `select` →
   `export-labelstudio`, with the emitted JSON parsed back.
 - `make-showcase` was run against the real clip and the exported model; output frames were
@@ -226,8 +231,9 @@ download date.
 
 ## Third-party components and responsibilities
 
-VisionOps code is the content of the `visionops/` package. It is separate from, and depends
-on, the following projects, each under its own licence and terms:
+VisionOps code is the content of the `visionops/` package and is released under the
+[MIT licence](LICENSE). It is separate from, and depends on, the following projects, each
+under its own licence and terms:
 
 - **Ultralytics YOLO** — optional, used only for local training, prediction, and ONNX export
   (`uv sync --extra train`). It is AGPL-3.0 licensed, with a separate commercial licence

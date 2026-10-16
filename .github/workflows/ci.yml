@@ -1,0 +1,42 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: uv sync --extra dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -q
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t visionops:ci .
+      # No ONNX model is committed, so the only end-to-end claim CI can check is that the
+      # image starts and reports the missing model instead of crashing.
+      - name: Container starts and reports the missing model
+        run: |
+          docker run -d --name visionops-ci -p 8000:8000 visionops:ci
+          for _ in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/health || true)
+            [ "$code" = "503" ] && break
+            sleep 1
+          done
+          body=$(curl -s http://127.0.0.1:8000/health || true)
+          docker logs visionops-ci
+          docker rm -f visionops-ci
+          test "$code" = "503"
+          echo "$body" | grep -q model_unavailable
