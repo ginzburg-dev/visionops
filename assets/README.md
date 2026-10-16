@@ -42,9 +42,6 @@ Accepted on 2026-10-16 against every gate above:
 | Camera | Hand-held but fixed vantage point, no pan or cut across the window used |
 | Licence | The Pexels License as published on 2026-10-16 allows free use and modification; it forbids unaltered resale, redistribution on other stock platforms, implying endorsement, trade-mark use, and showing identifiable people in a bad light. An annotated derivative published in this repository is within those terms. Attribution is not required but is recorded here and in `crowd-showcase.json` anyway. |
 
-The annotation adds person boxes and a count only. It identifies nobody, and the repository
-asserts nothing about the people in the frame.
-
 ### Why the committed clip is 1920x1080
 
 OpenCV on the rendering machine had no H.264 encoder available, so the writer falls back to

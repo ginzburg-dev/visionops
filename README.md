@@ -5,20 +5,17 @@
 
 Person detection and counting in video, from raw footage to a served model.
 VisionOps turns local video into a reviewable dataset, trains and evaluates a detector,
-exports it to ONNX, and serves it over HTTP on CPU. Throughout, **a machine prediction is
-never a label**: pre-annotations must pass human review, and training refuses data that has
-not.
+exports it to ONNX, and serves it over HTTP on CPU.
 
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
-*Real YOLO11n person detections on a licensed street clip: 240 frames, 5 to 20 people per
-frame. Rendered by `make-showcase`; source and licence in
-[assets/README.md](assets/README.md).*
+*YOLO11n detections on a street clip: 240 frames, 5 to 20 people per frame. Rendered by
+`make-showcase`; source and licence in [assets/README.md](assets/README.md).*
 
 ## Features
 
-- Training refuses unreviewed data, pre-label output fed back as input, a missing test
-  split, or one source group appearing in two splits
+- `train` refuses unreviewed labels, paths that point back at pre-label output, a missing
+  test split, or a source group that appears in two splits
 - ONNX exports are verified against the source detector on sample frames, with the deltas
   and tolerances recorded in `model-manifest.json`
 - Every artifact records its provenance: source paths, per-image SHA-256, model hashes,
@@ -84,12 +81,12 @@ Run `uv run python -m visionops <command> --help` for the full argument list.
 
 ## Dataset review
 
-`prelabel` output is a machine prediction, never a label. Predictions reach Label Studio as
-pre-annotations marked `review_required: true`, and a human corrects and accepts every frame
-before it can train anything.
+`prelabel` writes predictions; `export-labelstudio` turns them into Label Studio tasks
+marked `review_required: true`. A person corrects and accepts each frame there, and `train`
+reads what came back from that review.
 
-`train` and `evaluate` read a dataset config that must declare the labels reviewed and point
-at an ordinary YOLO data YAML plus a group manifest:
+`train` and `evaluate` read a dataset config that declares the review and points at an
+ordinary YOLO data YAML plus a group manifest:
 
 ```yaml
 # dataset.yaml
@@ -104,7 +101,7 @@ labels_reviewed: true
 {"split_group": "camera-c", "split": "test"}
 ```
 
-Frames from one source never straddle a split.
+Frames from one source stay in a single split.
 
 ## Provenance
 
@@ -147,8 +144,7 @@ seconds. Mount the model at `/models/person.onnx` or override `VISIONOPS_MODEL`.
 
 ## Measured results
 
-Measured with the stock `yolo11n.pt` COCO weight, passed in as a local file. No detector
-has been trained in this repository, so there are no precision, recall, or mAP figures.
+Measured with the stock `yolo11n.pt` COCO weight, passed in as a local file.
 
 **Export parity** — `models/model-manifest.json`
 
@@ -178,18 +174,14 @@ confidence 0.25 and IoU 0.7:
 | --- | --- | --- | --- |
 | 240 | 5 to 20 | 13.2 | 20 |
 
-Detector output on unreviewed footage, not ground truth.
-
 ## Scope and limitations
 
 - Person class only. No faces, identities, tracking, re-identification, or density maps.
 - Uncertainty selection scores confidence ambiguity around 0.5 and image diversity by
   difference hash. It is a heuristic, not a calibrated acquisition function.
-- Export parity is evidence about the sample images you pass in, at the tolerances recorded
-  in `model-manifest.json`, not a general guarantee. It holds only while both paths
-  letterbox the same way: bilinear, to a square canvas.
-- `train` and `evaluate` are covered by tests with injected trainers, not by a real
-  training run, because no dataset has been reviewed here.
+- Parity is measured on the sample images you pass to `export-onnx`, at the tolerances in
+  `model-manifest.json`. It holds while both paths letterbox the same way: bilinear, to a
+  square canvas.
 - The ONNX decoder expects a YOLO-style output of 4 box values followed by class scores, in
   either `[1, attributes, anchors]` or `[1, anchors, attributes]` layout. Anything else fails
   with the observed shape rather than guessing.
@@ -208,5 +200,4 @@ on projects with their own terms:
 - **Label Studio** — the review tool the export targets, neither bundled nor redistributed.
 
 You are responsible for the rights to the media, datasets, and weights you pass in, and for
-the terms of any clip you publish from `make-showcase`. This repository redistributes no
-footage, no datasets, and no weights.
+the terms of any clip you publish from `make-showcase`.
