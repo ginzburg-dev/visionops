@@ -129,17 +129,38 @@ The image is a slim CPU image, runs as a non-root user, and declares a healthche
 
 ## Measured results
 
-This section is reserved for numbers measured on this checkout. It is empty on purpose:
+Every number below was produced by a command in this repository and is backed by the named
+artifact. Do not publish an accuracy or speed claim that is not.
 
-- No detector has been trained here, so there are no precision, recall, or mAP figures.
-- No real model has been exported to ONNX here, so there is no export parity measurement and
-  no latency or throughput figure.
-- The real crowd showcase has not been rendered; see [assets/README.md](assets/README.md) for
-  the source gates and the exact command.
+The exported detector is the stock `yolo11n.pt` COCO weight passed in as a local file, not a
+detector trained here. It is used to exercise and measure the export, serving, and showcase
+paths; no detector has been trained on this checkout, so there are still no precision,
+recall, or mAP figures.
 
-What has been verified on this checkout is listed in the delivery notes below. Do not publish
-an accuracy or speed claim that is not backed by a `metrics.json`, `model-manifest.json`, or
-benchmark report file produced by these commands.
+**Export parity** — `models/model-manifest.json`
+
+`export-onnx` exported that weight at opset 12 and a fixed 640x640 input, then compared the
+ONNX Runtime detector against the Ultralytics source detector on five ingested 1920x1080
+frames carrying 24 person detections in total:
+
+| Measure | Measured | Tolerance |
+| --- | --- | --- |
+| Largest box corner difference | 0.00018 px | 2.0 px |
+| Largest confidence difference | 0.0000013 | 0.02 |
+
+Parity holds only because both paths letterbox identically; see the note under
+[Limitations](#limitations).
+
+**CPU latency** — `experiments/runs/benchmark-yolo11n.json`
+
+Thirty timed single-image runs after five warmups over the same five 1920x1080 frames, on
+Windows 11, Python 3.11.16, ONNX Runtime `CPUExecutionProvider`:
+
+| mean | p50 | p95 | throughput |
+| --- | --- | --- | --- |
+| 29.4 ms | 29.2 ms | 31.5 ms | 34.0 images/s |
+
+These are single-image latencies on one machine and do not transfer to another.
 
 ## Verified on this checkout
 
@@ -155,8 +176,10 @@ benchmark report file produced by these commands.
   performance.
 - The Docker image has **not** been built here: the Docker daemon was not running on this
   machine. `docker build -t visionops:local .` is unverified.
-- Training, evaluation, and ONNX export are covered through injected trainers, evaluators,
-  and exporters; the Ultralytics-backed paths need `uv sync --extra train` and local weights.
+- The Ultralytics-backed paths run for real with `uv sync --extra train`: `prelabel` was run
+  against a local `yolo11n.pt` weight, and `export-onnx` exported and parity-checked that
+  weight against the Ultralytics detector. Training and evaluation remain covered only
+  through injected trainers and evaluators, because no dataset has been reviewed here.
 
 ## Limitations
 
@@ -165,6 +188,9 @@ benchmark report file produced by these commands.
   difference hash; it is a heuristic, not a calibrated acquisition function.
 - Export parity is checked on the sample images you pass in, at the tolerances recorded in
   `model-manifest.json`. It is evidence about those samples, not a general guarantee.
+- Parity depends on both paths letterboxing identically: bilinear resampling to a square
+  canvas. A source detector configured with different preprocessing will diverge even though
+  the weights are the same, which is exactly what the check is there to catch.
 - The benchmark measures single-image CPU latency on the machine that runs it. Numbers do not
   transfer between machines.
 - The ONNX decoder expects a YOLO-style output of 4 box values followed by class scores, in
