@@ -83,3 +83,20 @@ def test_prelabel_records_empty_scenes(tmp_path):
     (record,) = read_jsonl(out, PredictionRecord)
     assert record.person_count == 0
     assert record.warnings == ("no person detections retained",)
+
+
+def test_predict_uses_square_letterbox_matching_the_onnx_input():
+    captured: dict[str, object] = {}
+
+    class _Model:
+        def predict(self, **kwargs):
+            captured.update(kwargs)
+            return [_Result(_Boxes([[1, 1, 5, 5]], [0.9], [0]))]
+
+    detector = UltralyticsPersonDetector(Path("missing-weights.pt"), predictor=lambda _: None)
+    detector._predictor = None
+    detector._model = _Model()
+    detector.detect(np.zeros((24, 32, 3), dtype=np.uint8))
+
+    assert captured["rect"] is False
+    assert captured["imgsz"] == 640

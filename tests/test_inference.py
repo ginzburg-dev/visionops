@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 import pytest
 
@@ -32,6 +33,17 @@ def test_letterbox_scales_pads_and_converts_to_rgb():
     assert result.tensor[0, 0, 320, 320] == pytest.approx(1.0)
     assert result.tensor[0, 2, 320, 320] == pytest.approx(0.0)
     assert result.tensor[0, 0, 0, 0] == pytest.approx(114 / 255, abs=1e-6)
+
+
+def test_letterbox_downscales_bilinearly_like_ultralytics():
+    rng = np.random.default_rng(0)
+    image = rng.integers(0, 256, size=(1080, 1920, 3), dtype=np.uint8)
+    expected = cv2.resize(image, (640, 360), interpolation=cv2.INTER_LINEAR)
+
+    tensor = letterbox(image, 640).tensor[0].transpose(1, 2, 0)[140:500]
+    restored = cv2.cvtColor((tensor * 255).round().astype(np.uint8), cv2.COLOR_RGB2BGR)
+
+    assert np.array_equal(restored, expected)
 
 
 def test_letterbox_rejects_empty_images():

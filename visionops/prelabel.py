@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 from visionops.hashing import file_sha256
+from visionops.inference import DEFAULT_INPUT_SIZE
 from visionops.jsonl import read_jsonl, write_jsonl
 from visionops.schemas import Detection, FrameRecord, PredictionRecord
 
@@ -90,6 +91,7 @@ class UltralyticsPersonDetector:
         iou: float = 0.7,
         device: str = "cpu",
         predictor: Callable[[np.ndarray], Any] | None = None,
+        imgsz: int = DEFAULT_INPUT_SIZE,
     ) -> None:
         path = Path(model_path)
         if predictor is None and not path.is_file():
@@ -100,6 +102,7 @@ class UltralyticsPersonDetector:
         self.confidence = float(confidence)
         self.iou = float(iou)
         self.device = device
+        self.imgsz = int(imgsz)
         self._predictor = predictor
         self._model: Any = None
 
@@ -122,6 +125,10 @@ class UltralyticsPersonDetector:
             iou=self.iou,
             device=self.device,
             verbose=False,
+            imgsz=self.imgsz,
+            # Square letterbox: the exported ONNX graph has a fixed NxN input, so the adapter
+            # must see the same geometry for its boxes to be comparable with served ones.
+            rect=False,
         )
 
     def detect(self, image_bgr: np.ndarray) -> list[Detection]:

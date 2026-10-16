@@ -40,8 +40,9 @@ def letterbox(image_bgr: np.ndarray, size: int = DEFAULT_INPUT_SIZE) -> Preproce
     scale = min(size / width, size / height)
     new_width = max(1, int(round(width * scale)))
     new_height = max(1, int(round(height * scale)))
-    interpolation = cv2.INTER_AREA if scale < 1 else cv2.INTER_LINEAR
-    resized = cv2.resize(image_bgr, (new_width, new_height), interpolation=interpolation)
+    # Always bilinear: Ultralytics LetterBox resizes this way, and the exported ONNX graph
+    # only reproduces the source model when it sees identically resampled pixels.
+    resized = cv2.resize(image_bgr, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
     canvas = np.full((size, size, 3), PAD_VALUE, dtype=np.uint8)
     pad_x = (size - new_width) / 2.0
     pad_y = (size - new_height) / 2.0
