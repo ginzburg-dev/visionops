@@ -6,17 +6,14 @@
 VisionOps is a person detection system for crowded scenes. It draws a bounding box around
 every person in a frame, with a confidence, and reports how many there are.
 
-No faces, no identities, no tracking between frames, no density maps.
-
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
-Behind that frame is a pipeline of commands: local video and images in, a reviewable dataset
-out, then training, held-out evaluation, an ONNX export checked against the source model,
-and CPU inference over HTTP.
+Local video and images go in, a reviewable dataset comes out, and from there: training,
+held-out evaluation, an ONNX export checked against the source model, and CPU inference
+over HTTP.
 
-The frame is the busiest one in a clip rendered by `make-showcase`; its provenance is in
-[`assets/crowd-showcase.json`](assets/crowd-showcase.json). The clip itself stays out of the
-repository, and [assets/README.md](assets/README.md) has the command that rebuilds it.
+The frame above is rendered by `make-showcase`; [assets/README.md](assets/README.md) has its
+source and the command that rebuilds it.
 
 ## Architecture
 
