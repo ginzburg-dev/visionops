@@ -3,17 +3,15 @@
 [![quality](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml/badge.svg)](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml)
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 
-VisionOps is a person detection system for crowded scenes. It draws a bounding box around
-every person in a frame, with a confidence, and reports how many there are.
+Person detection and counting in crowded scenes, from raw footage to a served model.
+VisionOps turns local video into a reviewable dataset, wraps detector training and held-out
+evaluation, exports to ONNX against a parity check, and serves CPU inference over HTTP.
 
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
-Local video and images go in, a reviewable dataset comes out, and from there: training,
-held-out evaluation, an ONNX export checked against the source model, and CPU inference
-over HTTP.
-
-The frame above is rendered by `make-showcase`; [assets/README.md](assets/README.md) has its
-source and the command that rebuilds it.
+*Real YOLO11n person detections on a licensed street clip: 240 frames, 5 to 20 people per
+frame. Rendered by `make-showcase`; source and licence in
+[assets/README.md](assets/README.md).*
 
 ## Architecture
 
@@ -32,8 +30,8 @@ flowchart TD
     I -->|make-showcase| L[Annotated crowd clip]
 ```
 
-Every arrow is an explicit command over a versioned JSONL or JSON contract. Nothing is
-downloaded at runtime: media, weights, and datasets are passed in as local paths.
+Every arrow is a command over a versioned JSONL or JSON contract. Nothing is downloaded at
+runtime: media, weights, and datasets are local paths.
 
 ## Quickstart
 
@@ -138,11 +136,8 @@ seconds. Mount the model at `/models/person.onnx` or override `VISIONOPS_MODEL`.
 
 ## Measured results
 
-Each number comes from the artifact named beside it.
-
-The model here is the stock `yolo11n.pt` COCO weight, passed in as a local file. It exercises
-the export, serving, and showcase paths. No detector has been trained in this repository, so
-there are no precision, recall, or mAP figures.
+Measured with the stock `yolo11n.pt` COCO weight, passed in as a local file. No detector
+has been trained in this repository, so there are no precision, recall, or mAP figures.
 
 **Export parity** — `models/model-manifest.json`
 
@@ -164,8 +159,6 @@ Windows 11, Python 3.11.16, ONNX Runtime `CPUExecutionProvider`:
 | --- | --- | --- | --- |
 | 29.4 ms | 29.2 ms | 31.5 ms | 34.0 images/s |
 
-These are single-image latencies on one machine and do not transfer to another.
-
 **Crowd showcase** — `assets/crowd-showcase.json`
 
 An 8.008 second window (240 frames at 29.97 fps, 1920x1080) of a Pexels crowd clip, rendered
@@ -175,8 +168,7 @@ through the same ONNX model at confidence 0.25 and IoU 0.7:
 | --- | --- | --- | --- |
 | 240 | 5 to 20 | 13.2 | 20 |
 
-These are counts this detector produced, not ground truth: nobody has reviewed this clip.
-[assets/README.md](assets/README.md) records the source, the licence, and the download date.
+Detector output on unreviewed footage, not ground truth.
 
 ## Scope and limitations
 
