@@ -91,6 +91,9 @@ def build_parser() -> argparse.ArgumentParser:
     showcase_parser.add_argument("--out", type=Path, required=True)
     showcase_parser.add_argument("--start-s", type=float, default=0.0)
     showcase_parser.add_argument("--duration-s", type=float, default=10.0)
+    showcase_parser.add_argument("--source-url")
+    showcase_parser.add_argument("--license")
+    showcase_parser.add_argument("--attribution")
     return parser
 
 
@@ -188,7 +191,14 @@ def _run_make_showcase(args: argparse.Namespace) -> int:
     from visionops.showcase import make_showcase
 
     artifacts = make_showcase(
-        args.video, OnnxPersonDetector(args.model), args.out, args.start_s, args.duration_s
+        args.video,
+        OnnxPersonDetector(args.model),
+        args.out,
+        args.start_s,
+        args.duration_s,
+        source_url=args.source_url,
+        license_name=args.license,
+        attribution=args.attribution,
     )
     print(f"showcase={artifacts.video_path}")
     return 0

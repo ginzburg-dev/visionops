@@ -13,3 +13,14 @@ checkpoints/
 *.pt
 *.onnx
 
+
+# Raw media, run outputs, and model artifacts stay out of Git.
+models/
+runs/
+experiments/runs/
+assets/raw/
+*.mp4
+*.mov
+*.mkv
+*.avi
+!assets/crowd-showcase.mp4
