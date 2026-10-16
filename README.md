@@ -8,6 +8,12 @@ A prediction contains one bounding box and confidence per detected person plus
 `person_count`, computed from the final filtered detections. VisionOps does not identify
 people, recognise faces, track identities between frames, or estimate crowd density.
 
+![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
+
+The frame above is the busiest frame of [`assets/crowd-showcase.mp4`](assets/crowd-showcase.mp4),
+produced by `make-showcase`; its provenance is in
+[`assets/crowd-showcase.json`](assets/crowd-showcase.json).
+
 ## Architecture
 
 ```mermaid
@@ -162,11 +168,27 @@ Windows 11, Python 3.11.16, ONNX Runtime `CPUExecutionProvider`:
 
 These are single-image latencies on one machine and do not transfer to another.
 
+**Crowd showcase** — `assets/crowd-showcase.json`
+
+An 8.008 second window (240 frames at 29.97 fps, 1920x1080) of a Pexels crowd clip, rendered
+through the same ONNX model at confidence 0.25 and IoU 0.7:
+
+| Frames | People per frame | Mean | Busiest frame |
+| --- | --- | --- | --- |
+| 240 | 5 to 20 | 13.2 | 20 |
+
+These are counts this detector produced on that footage, not ground truth: nothing in this
+clip has been human-reviewed, so the counts carry no measured precision or recall.
+[assets/README.md](assets/README.md) records the source, the licence decision, and the
+download date.
+
 ## Verified on this checkout
 
 - `uv run ruff check .`, `uv run ruff format --check .`, and `uv run pytest -q` pass.
 - The fixture smoke path runs end to end: `ingest` → fixture predictions → `select` →
   `export-labelstudio`, with the emitted JSON parsed back.
+- `make-showcase` was run against the real clip and the exported model; output frames were
+  inspected for readable boxes and the provenance JSON checked field by field.
 - ONNX Runtime is exercised for real against a tiny constant-output fixture model: the
   session loads, preprocessing and decoding run, and the full command chain
   `ingest` -> `prelabel` -> `select` -> `export-labelstudio` -> `benchmark` completes.
