@@ -61,3 +61,29 @@ def make_prediction(image_id: str, confidences=(0.9,), **kwargs):
         detections=detections,
         person_count=len(detections),
     )
+
+
+def write_fixture_onnx(path: Path, predictions, input_size: int = 640) -> Path:
+    """Write a tiny constant-output ONNX model shaped like YOLO output for runtime tests."""
+    import onnx
+    from onnx import TensorProto, helper, numpy_helper
+
+    array = np.asarray(predictions, dtype=np.float32).reshape(1, *np.shape(predictions))
+    tensor = numpy_helper.from_array(array, name="const_output")
+    node = helper.make_node("Constant", inputs=[], outputs=["output0"], value=tensor)
+    graph = helper.make_graph(
+        [node],
+        "visionops_fixture",
+        [
+            helper.make_tensor_value_info(
+                "images", TensorProto.FLOAT, [1, 3, input_size, input_size]
+            )
+        ],
+        [helper.make_tensor_value_info("output0", TensorProto.FLOAT, list(array.shape))],
+    )
+    model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 12)])
+    model.ir_version = 9
+    onnx.checker.check_model(model)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(model.SerializeToString())
+    return path

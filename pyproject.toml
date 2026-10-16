@@ -18,11 +18,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "ruff>=0.14,<1", "httpx>=0.27,<1"]
+dev = ["pytest>=8,<10", "ruff>=0.14,<1", "httpx>=0.27,<1", "onnx>=1.16,<2"]
 train = ["ultralytics>=8.3,<9", "onnx>=1.16,<2"]
 
 [project.scripts]
 visionops = "visionops.cli:main"
+
+[tool.setuptools]
+packages = ["visionops"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

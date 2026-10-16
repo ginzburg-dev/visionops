@@ -1,0 +1,17 @@
+.git
+.gitignore
+.venv
+.ruff_cache
+.pytest_cache
+**/__pycache__
+*.egg-info
+assets
+data
+docs
+experiments
+models
+runs
+tests
+uv.lock
+Dockerfile
+.dockerignore
