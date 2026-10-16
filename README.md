@@ -3,7 +3,7 @@
 [![quality](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml/badge.svg)](https://github.com/ginzburg-dev/visionops/actions/workflows/ci.yml)
 [![licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 
-Person detection and counting in crowded scenes, from raw footage to a served model.
+Person detection and counting in video, from raw footage to a served model.
 VisionOps turns local video into a reviewable dataset, wraps detector training and held-out
 evaluation, exports to ONNX against a parity check, and serves CPU inference over HTTP.
 

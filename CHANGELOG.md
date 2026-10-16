@@ -11,7 +11,7 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Command-line pipeline for person detection in crowded scenes: `ingest`, `prelabel`,
+- Command-line pipeline for person detection in video: `ingest`, `prelabel`,
   `select`, `export-labelstudio`, `train`, `evaluate`, `export-onnx`, `serve`, `benchmark`,
   and `make-showcase`, each a step over a versioned JSONL or JSON contract.
 - Deterministic frame ingest that records source path, group, frame index, timestamp, size,
