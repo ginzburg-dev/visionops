@@ -71,6 +71,9 @@ def build_parser() -> argparse.ArgumentParser:
     export_onnx_parser.add_argument("--out", type=Path, required=True)
     export_onnx_parser.add_argument("--imgsz", type=int, default=640)
     export_onnx_parser.add_argument("--sample-images", nargs="*", type=Path, default=[])
+    export_onnx_parser.add_argument("--confidence", type=float, default=0.25)
+    export_onnx_parser.add_argument("--iou", type=float, default=0.7)
+    export_onnx_parser.add_argument("--device", default="cpu")
 
     serve_parser = subparsers.add_parser("serve")
     serve_parser.add_argument("--model", type=Path, required=True)
@@ -163,7 +166,23 @@ def _run_evaluate(args: argparse.Namespace) -> int:
 def _run_export_onnx(args: argparse.Namespace) -> int:
     from visionops.export import export_onnx
 
-    print(f"onnx={export_onnx(args.model, args.out, args.imgsz, args.sample_images)}")
+    source_detector = None
+    if args.sample_images and args.model.suffix.lower() != ".onnx":
+        from visionops.prelabel import UltralyticsPersonDetector
+
+        source_detector = UltralyticsPersonDetector(
+            args.model, args.confidence, args.iou, args.device
+        )
+    onnx_path = export_onnx(
+        args.model,
+        args.out,
+        args.imgsz,
+        args.sample_images,
+        source_detector=source_detector,
+        confidence=args.confidence,
+        iou=args.iou,
+    )
+    print(f"onnx={onnx_path}")
     return 0
 
 
