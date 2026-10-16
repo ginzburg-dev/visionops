@@ -36,12 +36,7 @@ and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Notes
 
-- Person class only. The pipeline does not identify people, recognise faces, track
-  identities between frames, or estimate crowd density.
-- No detector has been trained in this repository, so it publishes no precision, recall, or
-  mAP figures. Every number in the README is backed by a generated artifact.
-- Raw media, datasets, model weights, and the rendered showcase video are not committed, and
-  nothing is downloaded at runtime.
+- Person class only. No faces, identities, tracking, re-identification, or density maps.
 
 [Unreleased]: https://github.com/ginzburg-dev/visionops/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/ginzburg-dev/visionops/releases/tag/v0.1.0
