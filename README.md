@@ -7,8 +7,7 @@ Person detection and counting in video, from raw footage to a served model.
 
 VisionOps is a Python package with a command-line interface. Ten commands turn local video
 into a reviewable dataset, train and evaluate a detector, export it to ONNX, and serve it
-over HTTP on CPU. The same steps are importable, so you can call them from Python instead
-of a shell.
+over HTTP on CPU.
 
 ![Annotated crowd frame: 20 person boxes and a person_count banner](assets/crowd-showcase.png)
 
